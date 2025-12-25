@@ -151,8 +151,8 @@ export async function savePlayerProfile(
     };
 
     const { data: updated, error } = await (supabase
-      .from("player_profiles")
-      .update(updateData as any) as any)
+      .from("player_profiles") as any)
+      .update(updateData)
       .eq("player_id", playerId)
       .select()
       .single();
