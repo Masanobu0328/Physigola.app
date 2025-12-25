@@ -1,0 +1,48 @@
+﻿
+> physiogora-app@0.1.0 build
+> next build
+
+  笆ｲ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Linting and checking validity of types ...
+
+./app/admin/settings/page.tsx
+75:6  Warning: React Hook useEffect has a missing dependency: 'selectedPlayerId'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/p/[token]/page.tsx
+26:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/p/[token]/[playerId]/page.tsx
+42:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+node.exe : Failed to compile.
+発生場所 行:1 文字:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Failed to compile.:String) [], Re 
+   moteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+./lib/actions/condition.ts:133:15
+Type error: Argument of type '{ id?: string | undefined; player_id: string; dat
+e: string; rpe: number; minutes: number; fatigue: "鬮・ | "菴・ | "荳ｭ"; sleep: "謔ｪ"
+ | "濶ｯ" | "譎ｮ騾・; pain: "縺ｪ縺・ | "縺ゅｊ"; pain_sites?: string | null | undefined; .
+.. 4 more ...; updated_at?: string | undefined; }' is not assignable to paramet
+er of type 'never'.
+
+[0m [90m 131 |[39m     [36mconst[39m { data[33m:[39m updated[33m,[39m 
+error } [33m=[39m [36mawait[39m supabase[0m
+[0m [90m 132 |[39m       [33m.[39m[36mfrom[39m([32m"daily_conditions"[
+39m)[0m
+[0m[31m[1m>[22m[39m[90m 133 |[39m       [33m.[39mupdate(insertData)[0
+m
+[0m [90m     |[39m               [31m[1m^[22m[39m[0m
+[0m [90m 134 |[39m       [33m.[39meq([32m"id"[39m[33m,[39m existing[3
+3m.[39mid)[0m
+[0m [90m 135 |[39m       [33m.[39mselect()[0m
+[0m [90m 136 |[39m       [33m.[39msingle()[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null
