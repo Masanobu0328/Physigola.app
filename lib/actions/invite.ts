@@ -92,12 +92,12 @@ export async function deactivateInviteLink(linkId: string) {
     return { success: false, error: "招待リンクが見つかりません" };
   }
 
-  const { data, error } = (await (supabase
+  const { data, error } = await (supabase
     .from("team_invite_links") as any)
     .update({ is_active: false })
     .eq("id", linkId)
     .select()
-    .single()) as { data: any; error: any };
+    .single();
 
   if (error) {
     return { success: false, error: error.message };

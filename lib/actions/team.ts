@@ -88,8 +88,8 @@ export async function saveTeamProfile(profileData: {
       policy: profileData.policy,
     };
 
-    const { data: updated, error } = await supabase
-      .from("team_profiles")
+    const { data: updated, error } = await (supabase
+      .from("team_profiles") as any)
       .update(updateData)
       .eq("team_id", user.team_id)
       .select()
