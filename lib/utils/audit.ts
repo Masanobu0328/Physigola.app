@@ -34,7 +34,7 @@ export async function createAuditLog(
     after: params.after ? JSON.parse(JSON.stringify(params.after)) : null,
   };
 
-  const { error } = await supabase.from("audit_logs").insert(logEntry);
+  const { error } = await (supabase.from("audit_logs") as any).insert(logEntry);
 
   if (error) {
     console.error("Failed to create audit log:", error);
