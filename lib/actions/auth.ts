@@ -83,21 +83,27 @@ export async function signUp(email: string, password: string, name: string) {
     return { success: false, error: authError?.message || 'アカウント作成に失敗しました' };
   }
 
-  // 2. デフォルトチームを作成
-  const { data: team, error: teamError } = await (supabase
-    .from("teams") as any)
+  // 2. デフォルトチームを作成（Service Roleを使用）
+  const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: team, error: teamError } = await serviceSupabase
+    .from("teams")
     .insert({ name: `${name}のチーム` })
     .select()
     .single();
 
   if (teamError || !team) {
     console.error('Team creation error:', teamError);
-    return { success: false, error: 'チーム作成に失敗しました' };
+    return { success: false, error: `チーム作成に失敗しました: ${teamError?.message || '不明なエラー'}` };
   }
 
-  // 3. admin_usersレコードを作成
-  const { error: adminError } = await (supabase
-    .from("admin_users") as any)
+  // 3. admin_usersレコードを作成（Service Roleを使用）
+  const { error: adminError } = await serviceSupabase
+    .from("admin_users")
     .insert({
       id: authData.user.id,
       team_id: team.id,
@@ -108,7 +114,7 @@ export async function signUp(email: string, password: string, name: string) {
 
   if (adminError) {
     console.error('Admin user creation error:', adminError);
-    return { success: false, error: '管理者権限の設定に失敗しました' };
+    return { success: false, error: `管理者権限の設定に失敗しました: ${adminError.message}` };
   }
 
   return { success: true };
