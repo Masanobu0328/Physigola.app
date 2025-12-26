@@ -16,9 +16,9 @@ import { FieldBlock } from "@/components/shared/FieldBlock";
 import {
   TEAM_PROFILE_OPTIONS,
 } from "@/lib/constants/options";
-import { getTeamProfile, saveTeamProfile } from "@/lib/actions/team";
-import { 
-  isDemoMode as checkDemoMode, 
+import { getTeam, getTeamProfile, saveTeamProfile, updateTeamName } from "@/lib/actions/team";
+import {
+  isDemoMode as checkDemoMode,
   getDemoTeamProfile,
 } from "@/lib/demo/mockData";
 
@@ -28,6 +28,9 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Team name
+  const [teamName, setTeamName] = useState("");
 
   // Team
   const [teamProfile, setTeamProfile] = useState({
@@ -46,6 +49,12 @@ export default function SettingsPage() {
   const loadData = async () => {
     setLoading(true);
 
+    // Load team info
+    const teamInfo: any = isDemoMode ? { name: "デモチーム" } : await getTeam();
+    if (teamInfo) {
+      setTeamName(teamInfo.name || "");
+    }
+
     // Load team profile
     const teamData: any = isDemoMode ? getDemoTeamProfile() : await getTeamProfile();
     if (teamData) {
@@ -62,12 +71,34 @@ export default function SettingsPage() {
     setLoading(false);
   };
 
+  const handleSaveTeamName = async () => {
+    if (isDemoMode) {
+      alert("デモモードでは保存できません");
+      return;
+    }
+
+    if (!teamName.trim()) {
+      alert("チーム名を入力してください");
+      return;
+    }
+
+    setSaving(true);
+    const result = await updateTeamName(teamName);
+    setSaving(false);
+
+    if (result.success) {
+      alert("チーム名を保存しました");
+    } else {
+      alert(`エラー: ${result.error}`);
+    }
+  };
+
   const handleSaveTeam = async () => {
     if (isDemoMode) {
       alert("デモモードでは保存できません");
       return;
     }
-    
+
     setSaving(true);
     const result = await saveTeamProfile(teamProfile);
     setSaving(false);
@@ -121,68 +152,89 @@ export default function SettingsPage() {
 
             <Separator />
 
+            {/* Team Name */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">チーム名</label>
+              <input
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="チーム名を入力"
+              />
+              <OrangeButton
+                className="w-full"
+                onClick={handleSaveTeamName}
+                disabled={saving}
+              >
+                {saving ? "保存中..." : "チーム名を保存"}
+              </OrangeButton>
+            </div>
+
+            <Separator />
+
             {/* Team Settings */}
             <div className="space-y-4">
-                <FieldBlock title="カテゴリ" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.category}
-                    value={teamProfile.category}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, category: v })
-                    }
-                  />
-                </FieldBlock>
+              <FieldBlock title="カテゴリ" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.category}
+                  value={teamProfile.category}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, category: v })
+                  }
+                />
+              </FieldBlock>
 
-                <FieldBlock title="レベル" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.level}
-                    value={teamProfile.level}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, level: v })
-                    }
-                  />
-                </FieldBlock>
+              <FieldBlock title="レベル" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.level}
+                  value={teamProfile.level}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, level: v })
+                  }
+                />
+              </FieldBlock>
 
-                <FieldBlock title="週の活動回数" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.weeklySessions}
-                    value={teamProfile.weeklySessions}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, weeklySessions: v })
-                    }
-                  />
-                </FieldBlock>
+              <FieldBlock title="週の活動回数" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.weeklySessions}
+                  value={teamProfile.weeklySessions}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, weeklySessions: v })
+                  }
+                />
+              </FieldBlock>
 
-                <FieldBlock title="試合頻度" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.matchFrequency}
-                    value={teamProfile.matchFrequency}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, matchFrequency: v })
-                    }
-                  />
-                </FieldBlock>
+              <FieldBlock title="試合頻度" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.matchFrequency}
+                  value={teamProfile.matchFrequency}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, matchFrequency: v })
+                  }
+                />
+              </FieldBlock>
 
-                <FieldBlock title="活動曜日" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.activeDays}
-                    value={teamProfile.activeDays}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, activeDays: v })
-                    }
-                    multi
-                  />
-                </FieldBlock>
+              <FieldBlock title="活動曜日" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.activeDays}
+                  value={teamProfile.activeDays}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, activeDays: v })
+                  }
+                  multi
+                />
+              </FieldBlock>
 
-                <FieldBlock title="方針" required>
-                  <ChoiceButtons
-                    options={TEAM_PROFILE_OPTIONS.policy}
-                    value={teamProfile.policy}
-                    onChange={(v) =>
-                      setTeamProfile({ ...teamProfile, policy: v })
-                    }
-                  />
-                </FieldBlock>
+              <FieldBlock title="方針" required>
+                <ChoiceButtons
+                  options={TEAM_PROFILE_OPTIONS.policy}
+                  value={teamProfile.policy}
+                  onChange={(v) =>
+                    setTeamProfile({ ...teamProfile, policy: v })
+                  }
+                />
+              </FieldBlock>
 
               <OrangeButton
                 className="w-full"

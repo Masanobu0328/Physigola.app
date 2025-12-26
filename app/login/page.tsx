@@ -172,8 +172,11 @@ export default function LoginPage() {
               🔧 デモモードで入る（認証スキップ）
             </button>
 
-            <div className="text-xs text-muted-foreground">
-              ※ アカウントをお持ちでない場合は、管理者にお問い合わせください。
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">アカウントをお持ちでない場合は </span>
+              <a href="/signup" className="text-orange-600 hover:underline font-medium">
+                新規登録
+              </a>
             </div>
           </CardContent>
         </Card>

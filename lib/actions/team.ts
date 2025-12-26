@@ -35,6 +35,50 @@ export async function getTeam() {
 }
 
 /**
+ * チーム名を更新
+ */
+export async function updateTeamName(name: string) {
+  const user = await requireAuth();
+  const supabase = await createClient();
+
+  // 既存チーム情報を取得
+  const { data: existingTeam } = await supabase
+    .from("teams")
+    .select("*")
+    .eq("id", user.team_id)
+    .single();
+
+  if (!existingTeam) {
+    return { success: false, error: "チームが見つかりません" };
+  }
+
+  const { data: updated, error } = await (supabase
+    .from("teams") as any)
+    .update({ name })
+    .eq("id", user.team_id)
+    .select()
+    .single();
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  // 監査ログ
+  await createAuditLog({
+    entityType: "team",
+    entityId: user.team_id,
+    action: "update",
+    actorRole: "admin",
+    actorUserId: user.id,
+    before: existingTeam,
+    after: updated,
+  });
+
+  revalidatePath("/admin");
+  return { success: true, data: updated };
+}
+
+/**
  * チームプロフィールを取得
  */
 export async function getTeamProfile() {
