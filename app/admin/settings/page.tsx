@@ -71,42 +71,42 @@ export default function SettingsPage() {
     setLoading(false);
   };
 
-  const handleSaveTeamName = async () => {
+  const handleSaveAll = async () => {
     if (isDemoMode) {
       alert("デモモードでは保存できません");
       return;
     }
 
+    // バリデーション
     if (!teamName.trim()) {
       alert("チーム名を入力してください");
       return;
     }
 
-    setSaving(true);
-    const result = await updateTeamName(teamName);
-    setSaving(false);
-
-    if (result.success) {
-      alert("チーム名を保存しました");
-    } else {
-      alert(`エラー: ${result.error}`);
-    }
-  };
-
-  const handleSaveTeam = async () => {
-    if (isDemoMode) {
-      alert("デモモードでは保存できません");
+    if (!teamProfile.category || !teamProfile.level || !teamProfile.weeklySessions ||
+      !teamProfile.matchFrequency || teamProfile.activeDays.length === 0 || !teamProfile.policy) {
+      alert("全ての項目を入力してください");
       return;
     }
 
     setSaving(true);
-    const result = await saveTeamProfile(teamProfile);
+
+    // 1. チーム名を保存
+    const nameResult = await updateTeamName(teamName);
+    if (!nameResult.success) {
+      setSaving(false);
+      alert(`チーム名の保存に失敗しました: ${nameResult.error}`);
+      return;
+    }
+
+    // 2. チーム設定を保存
+    const profileResult = await saveTeamProfile(teamProfile);
     setSaving(false);
 
-    if (result.success) {
+    if (profileResult.success) {
       alert("チーム設定を保存しました");
     } else {
-      alert(`エラー: ${result.error}`);
+      alert(`チーム設定の保存に失敗しました: ${profileResult.error}`);
     }
   };
 
@@ -154,7 +154,7 @@ export default function SettingsPage() {
 
             {/* Team Name */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">チーム名</label>
+              <label className="text-sm font-medium">チーム名 <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={teamName}
@@ -162,13 +162,6 @@ export default function SettingsPage() {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                 placeholder="チーム名を入力"
               />
-              <OrangeButton
-                className="w-full"
-                onClick={handleSaveTeamName}
-                disabled={saving}
-              >
-                {saving ? "保存中..." : "チーム名を保存"}
-              </OrangeButton>
             </div>
 
             <Separator />
@@ -238,10 +231,10 @@ export default function SettingsPage() {
 
               <OrangeButton
                 className="w-full"
-                onClick={handleSaveTeam}
+                onClick={handleSaveAll}
                 disabled={saving}
               >
-                {saving ? "保存中..." : "保存"}
+                {saving ? "保存中..." : "すべて保存"}
               </OrangeButton>
             </div>
           </CardContent>
