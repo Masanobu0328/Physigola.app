@@ -146,12 +146,12 @@ export default function AdminHomePage() {
       const teamProfileData = await getTeamProfile();
       if (teamProfileData) {
         setTeamProfile({
-          category: teamProfileData.category,
-          level: teamProfileData.level,
-          weeklySessions: teamProfileData.weekly_sessions,
-          matchFrequency: teamProfileData.match_frequency,
-          activeDays: teamProfileData.active_days,
-          policy: teamProfileData.policy,
+          category: (teamProfileData as any).category,
+          level: (teamProfileData as any).level,
+          weeklySessions: (teamProfileData as any).weekly_sessions,
+          matchFrequency: (teamProfileData as any).match_frequency,
+          activeDays: (teamProfileData as any).active_days,
+          policy: (teamProfileData as any).policy,
         });
       }
 
