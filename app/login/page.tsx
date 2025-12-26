@@ -12,7 +12,6 @@ import { Shield } from "lucide-react";
 import { OrangeButton } from "@/components/shared/OrangeButton";
 import { BRAND } from "@/lib/constants/theme";
 import { login } from "@/lib/actions/auth";
-import { testSupabaseConnection } from "@/lib/actions/test-supabase-connection";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,31 +39,6 @@ export default function LoginPage() {
     }
 
     setLoading(false);
-  };
-
-  // 開発用: デモモードでログインスキップ
-  const handleDevLogin = () => {
-    setLoading(true);
-    // Supabase未設定時でもチーム選択画面に遷移
-    router.push("/admin/select-team");
-  };
-
-  // Supabase接続テスト
-  const handleTestConnection = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const result = await testSupabaseConnection();
-      if (result.success) {
-        setError(`✅ 接続成功: Status ${result.status}`);
-      } else {
-        setError(`❌ 接続失敗: ${result.error}${result.errorCode ? ` (${result.errorCode})` : ''}`);
-      }
-    } catch (err: any) {
-      setError(`❌ テストエラー: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -141,36 +115,6 @@ export default function LoginPage() {
             >
               {loading ? "ログイン中..." : "ログイン"}
             </OrangeButton>
-
-            {/* 開発用ボタン */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-dashed" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">
-                  開発用
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleTestConnection}
-              disabled={loading}
-              type="button"
-              className="w-full text-sm font-medium py-3 border-2 border-blue-200 rounded-2xl transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              🔍 Supabase接続テスト
-            </button>
-
-            <button
-              onClick={handleDevLogin}
-              disabled={loading}
-              className="w-full text-sm font-medium py-3 border-2 border-dashed rounded-2xl transition-all hover:border-amber-400 hover:bg-amber-50 hover:text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ borderColor: loading ? '#e5e7eb' : '#fbbf24' }}
-            >
-              🔧 デモモードで入る（認証スキップ）
-            </button>
 
             <div className="text-center text-sm">
               <span className="text-muted-foreground">アカウントをお持ちでない場合は </span>
