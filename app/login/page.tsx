@@ -33,7 +33,7 @@ export default function LoginPage() {
     const result = await login(email, password);
 
     if (result.success) {
-      router.push("/admin");
+      router.push("/admin/select-team");
     } else {
       setError(result.error || "ログインに失敗しました");
     }

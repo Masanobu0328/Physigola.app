@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { OrangeButton } from "@/components/shared/OrangeButton";
-import { signUp } from "@/lib/actions/auth";
+import { signUp, login } from "@/lib/actions/auth";
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -33,12 +33,21 @@ export default function SignUpPage() {
 
         setLoading(true);
         const result = await signUp(email, password, name);
-        setLoading(false);
 
         if (result.success) {
-            alert("アカウントを作成しました！ログインページに移動します。");
-            router.push("/login");
+            // 自動ログイン
+            const loginResult = await login(email, password);
+            setLoading(false);
+
+            if (loginResult.success) {
+                alert("アカウントを作成しました！チーム設定を完了してください。");
+                router.push("/admin/settings");
+            } else {
+                alert("アカウントを作成しました！ログインページに移動します。");
+                router.push("/login");
+            }
         } else {
+            setLoading(false);
             setError(result.error || "アカウント作成に失敗しました");
         }
     };
