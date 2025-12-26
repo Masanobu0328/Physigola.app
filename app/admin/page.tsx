@@ -363,6 +363,37 @@ export default function AdminHomePage() {
 
             {/* Actions */}
             <div className="grid gap-2">
+              <OrangeButton
+                className="w-full"
+                onClick={async () => {
+                  const jerseyNumber = prompt("背番号を入力してください（例: 10）");
+                  if (!jerseyNumber) return;
+
+                  const number = parseInt(jerseyNumber);
+                  if (isNaN(number) || number < 0 || number > 999) {
+                    alert("有効な背番号を入力してください（0-999）");
+                    return;
+                  }
+
+                  if (isDemoMode) {
+                    alert("デモモードでは選手を追加できません");
+                    return;
+                  }
+
+                  const { createPlayer } = await import("@/lib/actions/player");
+                  const result = await createPlayer(number);
+
+                  if (result.success) {
+                    alert(`背番号${number}の選手を追加しました`);
+                    loadData();
+                  } else {
+                    alert(`エラー: ${result.error}`);
+                  }
+                }}
+              >
+                ➕ 選手を追加
+              </OrangeButton>
+
               <Link href="/admin/invite-links">
                 <OrangeOutlineButton className="w-full">
                   <LinkIcon className="h-4 w-4 mr-2" /> 選手入力URL（共有用）

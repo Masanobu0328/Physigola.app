@@ -218,11 +218,17 @@ export async function getUserTeams() {
  */
 export async function createNewTeam(teamName: string) {
   const user = await requireAuth();
-  const supabase = await createClient();
+
+  // Service Roleクライアントを使用
+  const { createClient: createServiceClient } = await import("@supabase/supabase-js");
+  const serviceSupabase = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // 1. チームを作成
-  const { data: team, error: teamError } = await (supabase
-    .from("teams") as any)
+  const { data: team, error: teamError } = await serviceSupabase
+    .from("teams")
     .insert({ name: teamName })
     .select()
     .single();
@@ -233,8 +239,8 @@ export async function createNewTeam(teamName: string) {
   }
 
   // 2. admin_usersレコードを作成（現在のユーザーを管理者として追加）
-  const { error: adminError } = await (supabase
-    .from("admin_users") as any)
+  const { error: adminError } = await serviceSupabase
+    .from("admin_users")
     .insert({
       id: user.id,
       team_id: team.id,

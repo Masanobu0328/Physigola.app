@@ -105,6 +105,7 @@ export default function SettingsPage() {
 
     if (profileResult.success) {
       alert("チーム設定を保存しました");
+      router.push("/admin");
     } else {
       alert(`チーム設定の保存に失敗しました: ${profileResult.error}`);
     }
