@@ -69,7 +69,7 @@ export async function login(email: string, password: string) {
 /**
  * サインアップ
  */
-export async function signUp(email: string, password: string, teamName: string) {
+export async function signUp(email: string, password: string, name: string) {
   const supabase = await createClient();
 
   // 1. ユーザーを作成
@@ -83,10 +83,10 @@ export async function signUp(email: string, password: string, teamName: string) 
     return { success: false, error: authError?.message || 'アカウント作成に失敗しました' };
   }
 
-  // 2. チームを作成
+  // 2. デフォルトチームを作成
   const { data: team, error: teamError } = await (supabase
     .from("teams") as any)
-    .insert({ name: teamName })
+    .insert({ name: `${name}のチーム` })
     .select()
     .single();
 
@@ -102,6 +102,7 @@ export async function signUp(email: string, password: string, teamName: string) 
       id: authData.user.id,
       team_id: team.id,
       email: email,
+      name: name,
       role: 'admin',
     });
 

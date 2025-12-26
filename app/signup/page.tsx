@@ -13,7 +13,7 @@ export default function SignUpPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [teamName, setTeamName] = useState("");
+    const [name, setName] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -21,7 +21,7 @@ export default function SignUpPage() {
         e.preventDefault();
         setError("");
 
-        if (!email || !password || !teamName) {
+        if (!email || !password || !name) {
             setError("全ての項目を入力してください");
             return;
         }
@@ -32,7 +32,7 @@ export default function SignUpPage() {
         }
 
         setLoading(true);
-        const result = await signUp(email, password, teamName);
+        const result = await signUp(email, password, name);
         setLoading(false);
 
         if (result.success) {
@@ -56,13 +56,13 @@ export default function SignUpPage() {
 
                     <form onSubmit={handleSignUp} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">チーム名</label>
+                            <label className="text-sm font-medium">お名前</label>
                             <input
                                 type="text"
-                                value={teamName}
-                                onChange={(e) => setTeamName(e.target.value)}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                placeholder="チーム名を入力"
+                                placeholder="山田太郎"
                                 disabled={loading}
                             />
                         </div>

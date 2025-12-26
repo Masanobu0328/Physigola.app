@@ -193,3 +193,71 @@ export async function saveTeamProfile(profileData: {
   }
 }
 
+/**
+ * ユーザーが所属する全チームを取得
+ */
+export async function getUserTeams() {
+  const user = await requireAuth();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("admin_users")
+    .select("team_id, teams(id, name)")
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Failed to fetch user teams:", error);
+    return [];
+  }
+
+  return data.map((item: any) => item.teams).filter(Boolean);
+}
+
+/**
+ * 新しいチームを作成
+ */
+export async function createNewTeam(teamName: string) {
+  const user = await requireAuth();
+  const supabase = await createClient();
+
+  // 1. チームを作成
+  const { data: team, error: teamError } = await (supabase
+    .from("teams") as any)
+    .insert({ name: teamName })
+    .select()
+    .single();
+
+  if (teamError || !team) {
+    return { success: false, error: "チーム作成に失敗しました" };
+  }
+
+  // 2. admin_usersレコードを作成（現在のユーザーを管理者として追加）
+  const { error: adminError } = await (supabase
+    .from("admin_users") as any)
+    .insert({
+      id: user.id,
+      team_id: team.id,
+      email: user.email,
+      name: user.name,
+      role: 'admin',
+    });
+
+  if (adminError) {
+    return { success: false, error: "管理者権限の設定に失敗しました" };
+  }
+
+  // 監査ログ
+  await createAuditLog({
+    entityType: "team",
+    entityId: team.id,
+    action: "create",
+    actorRole: "admin",
+    actorUserId: user.id,
+    after: team,
+  });
+
+  revalidatePath("/admin");
+  return { success: true, data: team };
+}
+
+
