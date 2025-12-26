@@ -16,19 +16,19 @@ import { BRAND } from "@/lib/constants/theme";
 import { computeStatus, STATUS } from "@/lib/logic/computeStatus";
 import { isTeamProfileComplete, isPlayerProfileComplete } from "@/lib/utils/validation";
 import type { TeamProfile, PlayerProfile } from "@/lib/logic/buildReview";
-import { 
-  isDemoMode as checkDemoMode, 
-  DEMO_ADMIN_USER, 
-  getDemoPlayers, 
+import {
+  isDemoMode as checkDemoMode,
+  DEMO_ADMIN_USER,
+  getDemoPlayers,
   getDemoTeamProfile,
   getDemoPlayerConditions,
-  getDemoTeams 
+  getDemoTeams
 } from "@/lib/demo/mockData";
 
 export default function AdminHomePage() {
   const router = useRouter();
   const isDemoMode = checkDemoMode();
-  
+
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [players, setPlayers] = useState<any[]>([]);
@@ -49,19 +49,19 @@ export default function AdminHomePage() {
       if (typeof window !== 'undefined') {
         teamId = localStorage.getItem('selectedTeamId');
       }
-      
+
       // チームが選択されていない場合はチーム選択画面へ
       if (!teamId) {
         router.push('/admin/select-team');
         return;
       }
-      
+
       setSelectedTeamId(teamId);
 
       // 選択されたチームの情報を取得
       const teams = getDemoTeams();
       const selectedTeam = teams.find(t => t.id === teamId);
-      
+
       const demoUser = {
         ...DEMO_ADMIN_USER,
         team_id: teamId,
@@ -116,13 +116,63 @@ export default function AdminHomePage() {
       });
       setPlayerStatuses(statuses);
     } else {
-      // 本番モード: 通常のデータ取得（TODO: 実装）
-      setUser(null);
-      setPlayers([]);
-      setPlayerStatuses([]);
+      // 本番モード: localStorageからチームIDを取得
+      if (typeof window !== 'undefined') {
+        teamId = localStorage.getItem('selectedTeamId');
+      }
+
+      // チームが選択されていない場合はチーム選択画面へ
+      if (!teamId) {
+        router.push('/admin/select-team');
+        return;
+      }
+
+      setSelectedTeamId(teamId);
+
+      // ユーザー情報を取得（動的インポート）
+      const { getCurrentUser } = await import("@/lib/actions/auth");
+      const { getTeamProfile } = await import("@/lib/actions/team");
+      const { getPlayers } = await import("@/lib/actions/player");
+
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        router.push('/login');
+        return;
+      }
+
+      setUser(currentUser);
+
+      // チームプロフィールを取得
+      const teamProfileData = await getTeamProfile();
+      if (teamProfileData) {
+        setTeamProfile({
+          category: teamProfileData.category,
+          level: teamProfileData.level,
+          weeklySessions: teamProfileData.weekly_sessions,
+          matchFrequency: teamProfileData.match_frequency,
+          activeDays: teamProfileData.active_days,
+          policy: teamProfileData.policy,
+        });
+      }
+
+      // プレイヤーデータを取得
+      const playersData = await getPlayers();
+      setPlayers(playersData || []);
+
+      // 各選手のステータスを計算（簡易版）
+      const statuses = (playersData || []).map((player: any) => ({
+        player,
+        status: STATUS.GREEN,
+        hasProfile: !!player.player_profiles,
+      }));
+      setPlayerStatuses(statuses);
     }
 
     setLoading(false);
+  };
+
+  const handleChangeTeam = () => {
+    router.push('/admin/select-team');
   };
 
   const handleLogout = () => {
@@ -169,17 +219,17 @@ export default function AdminHomePage() {
 
             {/* Top Bar */}
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+              <button onClick={handleChangeTeam} className="flex items-center gap-2 hover:opacity-70 transition">
                 <div className="leading-tight">
                   <div className="text-sm text-muted-foreground">Team</div>
                   <div
                     className="text-base font-semibold"
                     style={{ color: BRAND.ORANGE }}
                   >
-                    {user?.teams?.name || "チーム"}
+                    {user?.teams?.name || "チーム"} ▼
                   </div>
                 </div>
-              </div>
+              </button>
               <div className="flex items-center gap-2">
                 <Badge className="rounded-full" variant="secondary">
                   MVP
@@ -261,13 +311,13 @@ export default function AdminHomePage() {
 
                 const profileComplete = hasProfile && player.player_profiles
                   ? isPlayerProfileComplete({
-                      ageBand: player.player_profiles.age_band,
-                      position: player.player_profiles.position,
-                      dominantFoot: player.player_profiles.dominant_foot,
-                      playingStatus: player.player_profiles.playing_status,
-                      currentInjuryStatus: player.player_profiles.current_injury_status,
-                      pastInjuries: player.player_profiles.past_injuries,
-                    })
+                    ageBand: player.player_profiles.age_band,
+                    position: player.player_profiles.position,
+                    dominantFoot: player.player_profiles.dominant_foot,
+                    playingStatus: player.player_profiles.playing_status,
+                    currentInjuryStatus: player.player_profiles.current_injury_status,
+                    pastInjuries: player.player_profiles.past_injuries,
+                  })
                   : false;
 
                 return (

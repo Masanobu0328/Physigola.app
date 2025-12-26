@@ -228,7 +228,8 @@ export async function createNewTeam(teamName: string) {
     .single();
 
   if (teamError || !team) {
-    return { success: false, error: "チーム作成に失敗しました" };
+    console.error("Team creation error:", teamError);
+    return { success: false, error: teamError?.message || "チーム作成に失敗しました" };
   }
 
   // 2. admin_usersレコードを作成（現在のユーザーを管理者として追加）
@@ -238,12 +239,13 @@ export async function createNewTeam(teamName: string) {
       id: user.id,
       team_id: team.id,
       email: user.email,
-      name: user.name,
+      name: user.name || null,
       role: 'admin',
     });
 
   if (adminError) {
-    return { success: false, error: "管理者権限の設定に失敗しました" };
+    console.error("Admin user creation error:", adminError);
+    return { success: false, error: adminError.message || "管理者権限の設定に失敗しました" };
   }
 
   // 監査ログ
